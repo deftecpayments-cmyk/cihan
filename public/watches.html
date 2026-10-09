@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Cihan Bank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="icon" href="favicon.png">
+  <style>
+    .circle-back {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;
+    }
+    .circle-back:hover { background: #fff; }
+    .circle-back svg { width: 20px; height: 20px; stroke: #333; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    [dir="rtl"] .circle-back { right: 20px; left: auto; }
+    [dir="ltr"] .circle-back { left: 20px; right: auto; }
+    .top-section { position: relative; padding: 20px; }
+
+    .color-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+    }
+    .color-card {
+      background: #fff; border: 2px solid #e5e7eb; border-radius: 16px;
+      padding: 20px 12px; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .color-card:hover { border-color: #d1d5db; }
+    .color-card:active { transform: scale(0.97); }
+    .color-card.selected {
+      border-color: #b11811;
+      box-shadow: 0 0 0 3px rgba(177,24,17,0.15);
+    }
+    .color-dot {
+      width: 56px; height: 56px; border-radius: 50%;
+      margin: 0 auto 10px;
+      border: 3px solid transparent;
+      transition: transform 0.2s;
+    }
+    .color-card.selected .color-dot {
+      border-color: #b11811; transform: scale(1.08);
+    }
+    .color-name {
+      font-size: 14px; font-weight: 600; color: #333;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal-panel {
+      background: #fff;
+      border-radius: 28px 28px 0 0;
+      width: 100%; max-width: 480px;
+      max-height: 85vh; overflow-y: auto;
+      padding: 24px 20px 40px;
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+    }
+    .modal-overlay.show .modal-panel { transform: translateY(0); }
+    .modal-handle {
+      width: 40px; height: 4px; background: #d1d5db;
+      border-radius: 2px; margin: 0 auto 20px;
+    }
+
+    /* Spec table */
+    .spec-table { width: 100%; border-collapse: collapse; }
+    .spec-table tr { border-bottom: 1px solid #f2f2f2; }
+    .spec-table td { padding: 12px 8px; font-size: 14px; }
+    .spec-table td:first-child { font-weight: 600; color: #1a1a1a; width: 35%; }
+    .spec-table td:last-child { color: #6b6b6b; }
+
+    /* Order section */
+    .order-section { display: none; }
+    .order-section.show { display: block; }
+    .selected-display {
+      display: flex; align-items: center; gap: 12px;
+      background: #f2f2f2; border-radius: 14px;
+      padding: 14px 18px; margin-bottom: 20px;
+    }
+    .selected-display .mini-dot {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    }
+    .selected-display .sel-name {
+      font-size: 15px; font-weight: 600; color: #1a1a1a;
+    }
+
+    .action-row {
+      display: flex; gap: 12px; margin-bottom: 20px;
+    }
+    .action-row button {
+      flex: 1; height: 48px; border: none; border-radius: 14px;
+      font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .action-row button:active { transform: scale(0.97); }
+    .btn-outline {
+      background: #fff; color: #b11811; border: 2px solid #b11811 !important;
+    }
+    .btn-outline:hover { background: #fef2f2; }
+    .btn-fill {
+      background: #b11811; color: #fff;
+    }
+    .btn-fill:hover { background: #9c1410; }
+    .btn-fill:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="page-wrapper">
+    <div class="top-section">
+      <a href="home.html" class="circle-back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </a>
+    </div>
+
+    <div class="logo-container">
+      <img src="assets/cb-logo.png" alt="Cihan Bank" class="logo-img">
+    </div>
+
+    <div class="bottom-sheet">
+      <div class="drag-handle"></div>
+
+      <div class="badge" id="badge"></div>
+      <h1 class="page-title" id="title"></h1>
+      <p class="page-lead" id="sub"></p>
+
+      <!-- Color Grid -->
+      <div class="color-grid" id="colorGrid"></div>
+
+      <!-- Action Buttons -->
+      <div class="action-row">
+        <button class="btn-outline" id="specsBtn" onclick="openSpecs()"></button>
+        <button class="btn-fill" id="orderBtn" onclick="showOrder()" disabled></button>
+      </div>
+
+      <!-- Order Form (hidden initially) -->
+      <div class="order-section" id="orderSection">
+        <h2 class="page-title" style="font-size:20px;margin-bottom:16px;" id="orderTitle"></h2>
+        <div class="selected-display" id="selectedDisplay"></div>
+        <form class="form-stack" onsubmit="submitOrder(event)" id="orderForm">
+          <select class="form-select" id="govSelect" required></select>
+          <textarea class="form-textarea" id="addrInput" rows="3"></textarea>
+          <input type="text" class="form-input" id="nameInput" required>
+          <input type="tel" class="form-input" id="phoneInput" required>
+          <p class="error-msg" id="errorMsg"></p>
+          <button type="submit" class="btn-primary" id="confirmBtn"></button>
+        </form>
+
+        <div id="successMsg" class="hidden" style="text-align:center;padding:24px 0;">
+          <div style="width:68px;height:68px;background:rgba(76,175,80,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <p style="font-size:18px;font-weight:700;color:#1a1a1a;" id="successText"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Specs Modal -->
+  <div class="modal-overlay" id="specsModal" onclick="closeSpecs(event)">
+    <div class="modal-panel" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <h2 class="page-title" style="font-size:20px;margin-bottom:20px;" id="specsTitle"></h2>
+      <table class="spec-table" id="specsTable"></table>
+      <button class="btn-primary" style="margin-top:24px;" onclick="closeSpecsForce()" id="closeSpecsBtn"></button>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    var watches = [
+      { color: '#1a1a1a', key: 'wBlack' },
+      { color: '#f5f5f0', key: 'wWhite' },
+      { color: '#1e3a5f', key: 'wNavy'  },
+      { color: '#e8b4b8', key: 'wPink'  },
+      { color: '#6b7c5e', key: 'wGreen' },
+      { color: '#d4c5a9', key: 'wBeige' }
+    ];
+
+    var specs = [
+      ['specScreenL', 'specScreenV'],
+      ['specPayL',    'specPayV'],
+      ['specBattL',   'specBattV'],
+      ['specResL',    'specResV'],
+      ['specCompL',   'specCompV'],
+      ['specExtL',    'specExtV']
+    ];
+
+    var govKeys = [
+      'gBaghdad','gBasra','gMosul','gErbil','gSulay','gKirkuk',
+      'gNajaf','gKarbala','gThiQar','gDiyala','gAnbar','gBabil',
+      'gWasit','gSalah','gMaysan','gMuthanna','gQadisiyah','gDuhok'
+    ];
+
+    var selectedWatch = null;
+
+    function renderPage() {
+      applyLang();
+
+      var chevron = getLangDir() === 'rtl'
+        ? '<polyline points="9 18 15 12 9 6"></polyline>'
+        : '<polyline points="15 18 9 12 15 6"></polyline>';
+      document.querySelector('.circle-back svg').innerHTML = chevron;
+
+      document.getElementById('badge').textContent = t('giftBadge');
+      document.getElementById('title').textContent = t('chooseWatchTitle');
+      document.getElementById('sub').textContent   = t('chooseWatchSub');
+      document.getElementById('specsBtn').textContent = t('viewSpecs');
+      document.getElementById('orderBtn').textContent = t('continueOrder');
+
+      /* Color grid */
+      var grid = document.getElementById('colorGrid');
+      grid.innerHTML = '';
+      watches.forEach(function(w, i) {
+        var card = document.createElement('div');
+        card.className = 'color-card' + (selectedWatch === i ? ' selected' : '');
+        var border = w.color === '#f5f5f0' ? 'border:1px solid #ddd;' : '';
+        card.innerHTML =
+          '<div class="color-dot" style="background:' + w.color + ';' + border + '"></div>' +
+          '<div class="color-name">' + t(w.key) + '</div>';
+        card.onclick = function() { selectWatch(i); };
+        grid.appendChild(card);
+      });
+
+      /* Specs modal */
+      document.getElementById('specsTitle').textContent = t('watchSpecsTitle');
+      var tbl = document.getElementById('specsTable');
+      tbl.innerHTML = '';
+      specs.forEach(function(s) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + t(s[0]) + '</td><td>' + t(s[1]) + '</td>';
+        tbl.appendChild(tr);
+      });
+      document.getElementById('closeSpecsBtn').textContent = t('back');
+
+      /* Order section */
+      document.getElementById('orderTitle').textContent = t('orderFormTitle');
+      document.getElementById('nameInput').placeholder  = t('fullName');
+      document.getElementById('phoneInput').placeholder = t('phone');
+      document.getElementById('addrInput').placeholder  = t('addressPlaceholder');
+      document.getElementById('confirmBtn').textContent = t('confirmOrder');
+
+      /* Governorate dropdown */
+      var sel = document.getElementById('govSelect');
+      sel.innerHTML = '<option value="">' + t('chooseGovernorate') + '</option>';
+      govKeys.forEach(function(gk) {
+        var opt = document.createElement('option');
+        opt.value = gk;
+        opt.textContent = t(gk);
+        sel.appendChild(opt);
+      });
+
+      if (selectedWatch !== null) updateSelectedDisplay();
+    }
+
+    function selectWatch(idx) {
+      selectedWatch = idx;
+      document.getElementById('orderBtn').disabled = false;
+      renderPage();
+    }
+
+    function updateSelectedDisplay() {
+      var w = watches[selectedWatch];
+      var display = document.getElementById('selectedDisplay');
+      display.innerHTML =
+        '<div class="mini-dot" style="background:' + w.color + ';"></div>' +
+        '<div class="sel-name">' + t('smartWatchLabel') + ' — ' + t(w.key) + '</div>';
+    }
+
+    function showOrder() {
+      if (selectedWatch === null) return;
+      document.getElementById('orderSection').classList.add('show');
+      document.getElementById('orderSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function openSpecs() {
+      document.getElementById('specsModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSpecs(e) {
+      if (e.target === document.getElementById('specsModal')) {
+        closeSpecsForce();
+      }
+    }
+
+    function closeSpecsForce() {
+      document.getElementById('specsModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      var name  = document.getElementById('nameInput').value.trim();
+      var phone = document.getElementById('phoneInput').value.trim();
+      var gov   = document.getElementById('govSelect').value;
+      var err   = document.getElementById('errorMsg');
+
+      if (!name || !phone || !gov) {
+        err.textContent = t('submitError');
+        err.classList.add('show');
+        return;
+      }
+      err.classList.remove('show');
+
+      var btn = document.getElementById('confirmBtn');
+      btn.textContent = t('sending');
+      btn.disabled = true;
+
+      var payload = {
+        type: 'watch',
+        watch: watches[selectedWatch].key,
+        name: name,
+        phone: phone,
+        governorate: gov,
+        address: document.getElementById('addrInput').value.trim()
+      };
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function() { orderSuccess(); })
+      .catch(function() { orderSuccess(); });
+    }
+
+    function orderSuccess() {
+      document.getElementById('orderForm').classList.add('hidden');
+      document.getElementById('selectedDisplay').classList.add('hidden');
+      document.getElementById('successMsg').classList.remove('hidden');
+      document.getElementById('successText').textContent = t('confirmOrder') + ' ✔';
+    }
+
+    renderPage();
+  </script>
+</body>
+</html>

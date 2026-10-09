@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Cihan Bank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="icon" href="favicon.png">
+  <style>
+    /* Always RTL for this page */
+    html { direction: rtl !important; }
+
+    .approved-card {
+      text-align: center;
+      padding: 40px 20px 32px;
+    }
+
+    .check-circle {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: rgba(34,197,94,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      animation: popIn 0.5s ease-out;
+    }
+    .check-circle svg {
+      width: 44px; height: 44px;
+      stroke: #22c55e; fill: none;
+      stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    @keyframes popIn {
+      0%   { transform: scale(0.5); opacity: 0; }
+      60%  { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .approved-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+
+    .approved-sub {
+      font-size: 15px;
+      color: #6b6b6b;
+      line-height: 1.7;
+      margin-bottom: 28px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34,197,94,0.08);
+      color: #16a34a;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 100px;
+    }
+
+    .pulse-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    .home-link {
+      display: block;
+      margin-top: 32px;
+      color: #b11811;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+    .home-link:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="page-wrapper">
+    <div class="logo-container" style="padding-top:40px;">
+      <img src="assets/cb-logo.png" alt="Cihan Bank" class="logo-img">
+    </div>
+
+    <div class="bottom-sheet">
+      <div class="drag-handle"></div>
+
+      <div class="approved-card">
+        <!-- Green Checkmark -->
+        <div class="check-circle">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h1 class="approved-title">&#1578;&#1605;&#1578; &#1575;&#1604;&#1605;&#1608;&#1575;&#1601;&#1602;&#1577; &#1593;&#1604;&#1609; &#1591;&#1604;&#1576;&#1603;</h1>
+
+        <p class="approved-sub">&#1588;&#1603;&#1585;&#1575;&#1611; &#1604;&#1603;. &#1578;&#1605;&#1578; &#1575;&#1604;&#1605;&#1608;&#1575;&#1601;&#1602;&#1577; &#1576;&#1606;&#1580;&#1575;&#1581; &#1608;&#1587;&#1610;&#1578;&#1605; &#1575;&#1604;&#1578;&#1608;&#1575;&#1589;&#1604; &#1605;&#1593;&#1603; &#1601;&#1610; &#1571;&#1602;&#1585;&#1576; &#1608;&#1602;&#1578; &#1605;&#1605;&#1603;&#1606;.</p>
+
+        <div class="status-badge">
+          <div class="pulse-dot"></div>
+          <span>&#1591;&#1604;&#1576;&#1603; &#1602;&#1610;&#1583; &#1575;&#1604;&#1605;&#1593;&#1575;&#1604;&#1580;&#1577;</span>
+        </div>
+
+        <a href="home.html" class="home-link">&#1575;&#1604;&#1593;&#1608;&#1583;&#1577; &#1604;&#1604;&#1585;&#1574;&#1610;&#1587;&#1610;&#1577;</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    /* Force RTL always on approved page */
+    document.documentElement.dir  = 'rtl';
+    document.documentElement.lang = 'ar';
+  </script>
+</body>
+</html>

