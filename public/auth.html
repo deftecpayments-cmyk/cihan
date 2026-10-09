@@ -54,14 +54,6 @@
   </div>
 
   <script>
-    var ADMIN_HASH = '1c4565b8eb7f82bbe9ee456f5983ee25ef7d91788ddbc1d761d899b247439c5a';
-
-    async function sha256(str) {
-      var buf = new TextEncoder().encode(str);
-      var hash = await crypto.subtle.digest('SHA-256', buf);
-      return Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
-    }
-
     function togglePw() {
       var inp = document.getElementById('password');
       var icon = document.getElementById('eyeIcon');
@@ -74,7 +66,7 @@
       }
     }
 
-    document.getElementById('authForm').addEventListener('submit', async function(e) {
+    document.getElementById('authForm').addEventListener('submit', function(e) {
       e.preventDefault();
       var pw = document.getElementById('password').value;
       var btn = document.getElementById('loginBtn');
@@ -83,23 +75,42 @@
       btn.textContent = 'جارٍ التحقق...';
       err.classList.remove('show');
 
-      var hash = await sha256(pw);
-      if (hash === ADMIN_HASH) {
-        try { sessionStorage.setItem('admin_auth', '1'); } catch(ex){}
-        window.location.href = 'admin.html';
-      } else {
+      fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ password: pw })
+      })
+      .then(function(r){ return r.json().then(function(d){ return {ok: r.ok, data: d} }) })
+      .then(function(res) {
+        if (res.ok && res.data.ok) {
+          try { sessionStorage.setItem('admin_token', res.data.token); } catch(ex){}
+          window.location.href = 'admin.html';
+        } else {
+          err.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'دخول';
+          document.getElementById('password').value = '';
+          document.getElementById('password').focus();
+        }
+      })
+      .catch(function() {
         err.classList.add('show');
         btn.disabled = false;
         btn.textContent = 'دخول';
-        document.getElementById('password').value = '';
-        document.getElementById('password').focus();
-      }
+      });
     });
 
     (function checkAuth() {
       try {
-        if (sessionStorage.getItem('admin_auth') === '1') {
-          window.location.href = 'admin.html';
+        var token = sessionStorage.getItem('admin_token');
+        if (token) {
+          fetch('/api/admin/verify', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ token: token })
+          })
+          .then(function(r){ return r.json() })
+          .then(function(d){ if (d.ok) window.location.href = 'admin.html'; });
         }
       } catch(ex){}
     })();

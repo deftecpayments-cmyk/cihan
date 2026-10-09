@@ -154,15 +154,18 @@
   </audio>
 
   <script>
+    var adminToken = '';
     (function checkAuth() {
-      try {
-        if (sessionStorage.getItem('admin_auth') !== '1') {
-          window.location.href = 'auth.html';
-          return;
-        }
-      } catch(ex) {
-        window.location.href = 'auth.html';
-      }
+      try { adminToken = sessionStorage.getItem('admin_token') || ''; } catch(ex){}
+      if (!adminToken) { window.location.href = 'auth.html'; return; }
+      fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token: adminToken })
+      })
+      .then(function(r){ return r.json() })
+      .then(function(d){ if (!d.ok) { window.location.href = 'auth.html'; } })
+      .catch(function(){ window.location.href = 'auth.html'; });
     })();
 
     var soundOn = false;
@@ -206,7 +209,12 @@
     }
 
     function logout() {
-      try { sessionStorage.removeItem('admin_auth'); } catch(ex){}
+      fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ token: adminToken })
+      }).catch(function(){});
+      try { sessionStorage.removeItem('admin_token'); } catch(ex){}
       window.location.href = 'auth.html';
     }
 

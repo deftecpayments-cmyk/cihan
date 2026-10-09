@@ -1,9 +1,12 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const ADMIN_HASH = process.env.ADMIN_HASH || '1c4565b8eb7f82bbe9ee456f5983ee25ef7d91788ddbc1d761d899b247439c5a';
+const adminTokens = new Set();
 
 app.use(express.json());
 
@@ -28,6 +31,29 @@ function writeData(data) {
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.post('/api/admin/login', (req, res) => {
+  const pw = req.body.password || '';
+  const hash = crypto.createHash('sha256').update(pw).digest('hex');
+  if (hash === ADMIN_HASH) {
+    const token = crypto.randomBytes(32).toString('hex');
+    adminTokens.add(token);
+    res.json({ ok: true, token });
+  } else {
+    res.status(401).json({ ok: false });
+  }
+});
+
+app.post('/api/admin/verify', (req, res) => {
+  const token = req.body.token || '';
+  res.json({ ok: adminTokens.has(token) });
+});
+
+app.post('/api/admin/logout', (req, res) => {
+  const token = req.body.token || '';
+  adminTokens.delete(token);
+  res.json({ ok: true });
 });
 
 app.post('/api/contact', (req, res) => {
